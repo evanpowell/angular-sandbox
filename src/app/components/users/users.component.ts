@@ -1,5 +1,5 @@
-import { Component, OnInit } from '@angular/core';
-
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { UserService } from '../../services/user.service';
 import { User } from '../../models/User';
 
 @Component({
@@ -8,81 +8,56 @@ import { User } from '../../models/User';
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit {
+  user: User = {
+    firstName: '',
+    lastName: '',
+    email: ''
+  };
   users: User[];
-  showExtended: boolean = true;
   loaded: boolean = false;
   enableAdd: boolean = true;
-  currentClasses: object = {};
-  currentStyles: object = {};
+  showUserForm: boolean = false;
+  @ViewChild('userForm') form: any;
+  data: any;
 
-  constructor() { }
+  constructor(private userService: UserService) {
+
+  }
 
   ngOnInit() {
-    this.users = [
-      {
-        firstName: 'John',
-        lastName: 'Doe',
-        age: 30,
-        address: {
-          street: '50 Main St',
-          city: 'Boston',
-          state: 'MA'
-        },
-        image: 'https://placeimg.com/600/600/people/3',
-        isActive: true
-      },
-      {
-        firstName: 'Kevin',
-        lastName: 'Johnson',
-        age: 50,
-        address: {
-          street: '20 School St',
-          city: 'Otherplace',
-          state: 'MA'
-        },
-        image: 'https://placeimg.com/600/600/people/4',
-        isActive: false
-      },
-      {
-        firstName: 'Karen',
-        lastName: 'Smazz',
-        age: 24,
-        address: {
-          street: '123 Beach St',
-          city: 'Orlando',
-          state: 'FL'
-        },
-        image: 'https://placeimg.com/600/600/people/11',
-        isActive: true
-      }
-    ];
-
-    this.loaded = true;
-    // this.showExtended = false;
-
-    this.addUser({
-      firstName: 'Captain',
-      lastName: 'Kangaroo'
+    this.userService.getData().subscribe(data => {
+      console.log(data);
     })
-
-    this.setCurrentClasses();
-    this.setCurrentStyles();
+    this.userService.getUsers().subscribe(users => {
+      this.users = users;
+      this.loaded = true;
+    });
   }
 
-  addUser(user: User) {
-    this.users.push(user);
-  }
+  // addUser() {
+  //   this.user.isActive = true;
+  //   this.user.registered = new Date();
 
-  setCurrentClasses() {
-    this.currentClasses = {
-      'btn-success': this.enableAdd,
-    }
-  }
+  //   this.users.unshift(this.user);
+    
+  //   this.user = {
+  //     firstName: '',
+  //     lastName: '',
+  //     email: ''
+  //   }
+  // }
 
-  setCurrentStyles() {
-    this.currentStyles = {
-      'padding-top': this.showExtended ? '0' : ' 3rem',
-      'font-size': this.showExtended ? '' : '2.3rem'
+  onSubmit({ value, valid }: { value: User, valid: boolean }) {
+    if (!valid) {
+      console.log('form is invalid')
+    } else {
+      value.isActive = true;
+      value.registered = new Date();
+      value.hide = true;
+
+      this.userService.addUser(value);
+
+      this.form.reset();
     }
   }
 }
